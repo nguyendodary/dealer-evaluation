@@ -8,7 +8,7 @@
   </style>
   <script>
     let produrl = "https://product-details-service-9ecw.onrender.com/";
-    let dealerurl = "https://dealer-pricing-service.onrender.com/pricing/1";
+    let dealerurl = "https://dealer-pricing-service.onrender.com/";
 
     axios
       .get(produrl + "products")
@@ -39,7 +39,7 @@
 
       if (valToFetch != "--SELECT--") {
         axios
-          .get(dealerurl + valToFetch)
+          .get(dealerurl + "pricing/" + valToFetch)
           .then((res) => {
             let selEl = document.createElement("select");
             selEl.setAttribute("id", "selDealer");
@@ -51,7 +51,7 @@
 
             res.data.forEach((element) => {
               let optEl = document.createElement("option");
-              optEl.setAttribute("value", element.dealer); // Giả sử dữ liệu có trường "dealer"
+              optEl.setAttribute("value", element.dealer);
               optEl.innerText = element.dealer;
               selEl.appendChild(optEl);
             });
@@ -77,23 +77,29 @@
       pricingEl.childNodes.forEach((node) => pricingEl.removeChild(node));
 
       if (dealervalToFetch != "All Dealers") {
-        axios.get(dealerurl + "price/" + dealervalToFetch + "/" + prodvalToFetch).then((res) => {
-          document.getElementById("pricing").innerText = res.data.message;
-        });
+        axios
+          .get(dealerurl + "price/" + dealervalToFetch + "/" + prodvalToFetch)
+          .then((res) => {
+            document.getElementById("pricing").innerText = res.data.message;
+          })
+          .catch((error) => console.error("Error fetching price:", error));
       } else {
-        axios.get(dealerurl + "allprice/" + prodvalToFetch).then((res) => {
-          let table = document.createElement("table");
+        axios
+          .get(dealerurl + "allprice/" + prodvalToFetch)
+          .then((res) => {
+            let table = document.createElement("table");
 
-          res.data.prices.forEach((price) => {
-            let tr = document.createElement("tr");
-            tr.innerHTML = "<td>" + price.key + "</td><td>" + price.value + "</td>";
-            table.appendChild(tr);
-          });
+            res.data.prices.forEach((price) => {
+              let tr = document.createElement("tr");
+              tr.innerHTML = "<td>" + price.key + "</td><td>" + price.value + "</td>";
+              table.appendChild(tr);
+            });
 
-          if (table.hasChildNodes()) {
-            pricingEl.appendChild(table);
-          }
-        });
+            if (table.hasChildNodes()) {
+              pricingEl.appendChild(table);
+            }
+          })
+          .catch((error) => console.error("Error fetching all prices:", error));
       }
     };
   </script>
